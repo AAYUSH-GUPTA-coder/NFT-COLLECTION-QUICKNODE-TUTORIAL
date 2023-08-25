@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -10,57 +10,55 @@ error YOU_ALREADY_MINTED_NFT();
 error ALL_NFTS_ARE_MINTED();
 
 contract QuickNft is ERC721Enumerable, Ownable {
-    uint256[] public supplies = [500, 500, 500];
-    uint256[] public minted = [0, 0, 0];
+    uint256 public supplies = 500;
+    uint256 public minted;
     string[] public cid = [
-        "ipfs://Qmdr1zPumimEFKRkszo3nfFhGQ3UwofQXMbfDy1wd1gdLQ",
-        "ipfs://QmTUZxtkAM5rMRHbmZKQLqGSYPG5SVyENk163x8Xb247vJ",
-        "ipfs://QmeQp3LBdUj9nWrWiikmNwQ5NPjuuKxTHAsUrWZfKeRTF5"
+        "ipfs://QmQQEjRjhUQPgJ51U2PKkwyRLgktzGWmX95vgUzWfBj5gb",
+        "ipfs://Qmch5VaqXCc5ZbwKuL2awac1vrBXBBPiB5h7WxtYKDZ7DS",
+        "ipfs://QmQg5wf1KHLDA1pEg51wK44UqPa6wJztTxppgb92VyPEbR"
     ];
-    mapping(uint256 => mapping(address => bool)) public member;
 
     constructor() ERC721("QuickNft", "QNN") {}
 
-    // to Put NFT to Opensea
     /**
      * @notice function to put NFT to Opensea
-     * @param _tokenId 
+     * @param _cidId ID of the metadata of NFT we want to mint
+     * @dev tokenURI overrides the Openzeppelin's ERC721 implementation for tokenURI function
+     * This function returns the URI from where we can extract the metadata for a given tokenId
      */
-    function uri(uint256 _tokenId) public view returns (string memory) {
-        // require(_tokenId <= supplies.length-1,"NFT does not exist");
-        if (_tokenId >= supplies.length) revert NFT_NOT_EXIST();
+    function tokenURI(
+        uint256 _cidId
+    ) public view virtual override returns (string memory) {
+        // require(_cidId <= supplies.length-1,"NFT does not exist");
+        if (_cidId >= cid.length) revert NFT_NOT_EXIST();
         // return
         //     string(
         //         abi.encodePacked(
         //             "ipfs://QmSCFe5vvoPsSpyHZpGAW78GJ4bAuDcySCV9UnMm7B69iS/",
-        //             Strings.toString(_tokenId),
+        //             Strings.toString(_cidId),
         //             ".json"
         //         )
         //     );
-        return string(abi.encodePacked(cid[_tokenId]));
+        return string(abi.encodePacked(cid[_cidId]));
     }
 
-    function mint(uint256 _tokenId) public {
-        // require(
-        //     !member[_tokenId][msg.sender],
-        //     "You have already claimed this NFT."
-        // );
-        if (member[_tokenId][msg.sender]) revert YOU_ALREADY_MINTED_NFT();
-        // require(_tokenId <= supplies.length - 1, "NFT does not exist");
-        if (_tokenId >= supplies.length) revert NFT_NOT_EXIST();
-        uint256 index = _tokenId;
-
-        // require(
-        //     minted[index] + 1 <= supplies[index],
-        //     "All the NFT have been minted"
-        // );
-        if (minted[index] + 1 > supplies[index]) revert ALL_NFTS_ARE_MINTED();
-        _mint(msg.sender, _tokenId);
-        minted[index] += 1;
-        member[_tokenId][msg.sender] = true;
+    /**
+     * @notice function to mint the NFT
+     * @param _cidId CID ID to select the metadata of your choice
+     */
+    function mint(uint256 _cidId) public {
+        if (_cidId >= cid.length) revert NFT_NOT_EXIST();
+        if (minted + 1 > supplies) revert ALL_NFTS_ARE_MINTED();
+        _safeMint(msg.sender, minted);
+        unchecked {
+            ++minted;
+        }
     }
 
-    function totalNftMinted(uint256 _tokenId) public view returns (uint256) {
-        return minted[_tokenId];
+    /**
+     * @notice function to get total number of NFTs minted
+     */
+    function totalNftMinted() public view returns (uint256) {
+        return minted;
     }
 }
