@@ -1,0 +1,9 @@
+{
+  "name": "delhi",
+  "description": "Delhi, India's capital territory, is a vibrant metropolis rich in history and culture. It houses historic landmarks like the Red Fort and Qutub Minar alongside modern architecture. The city is a blend of diverse communities, bustling markets, and a thriving food scene, encapsulating India's past and present within its borders.",
+  "image": "ipfs://QmTUZxtkAM5rMRHbmZKQLqGSYPG5SVyENk163x8Xb247vJ",
+  "properties": {
+    "rarity": "common",
+    "fanciness": 2
+  }
+}
